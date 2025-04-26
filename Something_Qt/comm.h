@@ -1,3 +1,7 @@
+/**
+ * @file
+ */
+
 #ifndef COMM_H
 #define COMM_H
 
@@ -8,10 +12,17 @@ extern "C"
 
 #include <stdint.h>
 
+#define DONTUSE
+#define USERSTRUCT
+#define USERENUM
+
 /**
- * @brief General
+ * @brief ComDef_TypeDef
+ * General Message Structure,
+ * Access the elements with macro, dont use structItself
+ *
  */
-typedef struct __attribute__((__packed__)) com_def_s
+DONTUSE typedef struct __attribute__((__packed__)) com_def_s
 {
     uint8_t u8Heading;
     uint8_t u8Command;
@@ -22,60 +33,81 @@ typedef struct __attribute__((__packed__)) com_def_s
 } ComDef_TypeDef;
 
 /**
- * @brief IMU
+ * @brief ComDefImu_TypeDef
  */
-typedef struct __attribute__ ((__packed__ )) com_def_imu_s
+USERSTRUCT typedef struct __attribute__ ((__packed__ )) com_def_imu_s
 {
     float fX;
     float fY;
     float fZ;
 } ComDefImu_TypeDef;
 
+
+
 /**
- * @brief Angle
+ * @brief ComDefMode_TypeDef
  */
-typedef struct __attribute__((__packed__)) com_def_angle_s
+USERSTRUCT typedef struct __attribute__((__packed__)) com_def_mode_s
+{
+    uint8_t u8Mode;
+} ComDefMode_TypeDef;
+
+/**
+ * @brief ComDefAngle_TypeDef
+ */
+USERSTRUCT typedef struct __attribute__((__packed__)) com_def_angle_s
 {
     uint16_t u16Angle;
 } ComDefAngle_TypeDef;
 
-
+/**
+ * @brief ComDefCommandMask_TypeDef
+ */
+USERENUM typedef enum com_def_command_mask_e
+{
+    ComDefCommandMaskXet  = 0x0F,
+    ComDefCommandMaskGet  = 0x01,
+    ComDefCommandMaskSet  = 0x02,
+    ComDefCommandMaskRet  = 0x04,
+} ComDefCommandMask_TypeDef;
 
 
 /**
- * @brief getSetMask
+ * @brief ComDefCommands_TypeDef
  */
-typedef enum com_def_command_mask_e
+USERENUM typedef enum com_def_commands_e
 {
-    CommandModeMaskGet  = 0x01,
-    CommandModeMaskSet  = 0x02,
-} CommandModeMask_TypeDef;
-
-
-/**
- * @brief Maskable Commands
- */
-typedef enum com_def_commands_e
-{
-    ComDefCommandMode   = 0x10,
-    ComDefCommandAngle  = 0x20,
+    ComDefCommandModeMask     = 0xF0,
+    ComDefCommandMode         = 0x10,
+    ComDefCommandAngle        = 0x20,
+    ComDefCommandSamplingRate = 0x40,
 } ComDefCommands_TypeDef;
 
-#define ComDef_xu8CommandModeGet(__COMMAND)  \
-  ( (__COMMAND) | CommandModeMaskGet )
 
-#define ComDef_xu8CommandModeSet(__COMMAND)  \
-  ( (__COMMAND) | CommandModeMaskGet )
+/**
+ * @brief ComDef_Modes_TypeDef
+ */
+USERENUM typedef enum com_def_modes_e
+{
+    ComDefModeStream    = 0x01,
+    ComDefModeOnRequest = 0x02,
+} ComDef_Modes_TypeDef;
 
-// typedef struct __attribute__((__packed__)) com_def_s
-// {
-//     uint8_t u8Heading;
-//     uint8_t u8Command;
-//     uint16_t u16PayloadLength;
-//     // PAYLOAD
-//     // CRC
-//     // END
-// } ComDef_TypeDef;
+
+
+// #define ComDef_xu8CommandGet(__COMMAND)  \
+//   ( (__COMMAND) | CommandMaskGet )
+//
+// #define ComDef_xu8CommandSet(__COMMAND)  \
+//   ( (__COMMAND) | CommandMaskGet )
+//
+// #define ComDef_xu8CommandRet(__COMMAND)  \
+//   ( (__COMMAND) | CommandMaskRet )
+
+
+#define ComDef_xu8CommandMask(__COMMAND, __MASK)  \
+  ( (__COMMAND) | (__MASK) )
+
 
 #define ComDef_xu8GetHeading(__MSG__)  \
 ( ( (ComDef_TypeDef*) ((__MSG__)) ) ->u8Heading )
@@ -98,6 +130,8 @@ uint8_t __BUFFERNAME [sizeof( __PAYLOADTYPE) + 5] = {0}
 #define ComDef_xpu8GetPayload(__MSG__)  \
 ( * ( ( (uint8_t *)&( ComDef_xu16GetPayloadLength(__MSG__)) ) +1) )
 
+#define ComDef_xpu32CalculateLength(__MSG__) \
+( ComDef_xu16GetPayloadLength(__MSG__) +5 )
 
 
 

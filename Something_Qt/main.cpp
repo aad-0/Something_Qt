@@ -13,7 +13,7 @@ int test_com (int argc, char * argv [])
     (void ) argv;
     ComDef_xpu8DeclareBuffer(check, ComDefImu_TypeDef);
     ComDef_xu8GetHeading(&check) = 0xAA;
-    ComDef_xu8GetCommand(&check) = ComDef_xu8CommandModeGet(ComDefCommandMode);
+    ComDef_xu8GetCommand(&check) = ComDef_xu8CommandMask(ComDefCommandMode, ComDefCommandMaskGet); //ComDef_xu8CommandModeGet(ComDefCommandMode);
     ComDef_xu16GetPayloadLength(&check) = (uint16_t) sizeof(ComDefImu_TypeDef);
     ComDef_xu8GetCrc(&check) = 0xFA;
     ComDef_xu8GetEnd(&check) = 0xBB;

@@ -1,4 +1,5 @@
 QT       += core gui
+QT  += serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,16 +10,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    comm.c \
-    main.cpp \
-    mainwindow.cpp
+		uiaddport.cpp \
+	acceldevice.cpp \
+	comm.c \
+	vcomhandler.cpp \
+	main.cpp \
+	mainwindow.cpp
 
 HEADERS += \
-    comm.h \
-    mainwindow.h
+		uiaddport.h \
+	acceldevice.h \
+	comm.h \
+	vcomhandler.h \
+	mainwindow.h
 
 FORMS += \
-    mainwindow.ui
+		uiaddport.ui \
+		mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
