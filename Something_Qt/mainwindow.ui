@@ -29,6 +29,16 @@ color: rgb(255, 255, 255);</string>
      </rect>
     </property>
    </widget>
+   <widget class="RoadVisualizer" name="accelView" native="true">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>0</y>
+      <width>501</width>
+      <height>371</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -42,6 +52,14 @@ color: rgb(255, 255, 255);</string>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RoadVisualizer</class>
+   <extends>QWidget</extends>
+   <header>roadvisualizer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

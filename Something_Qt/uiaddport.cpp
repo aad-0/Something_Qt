@@ -86,7 +86,7 @@ void UiAddPort::setComboBoxes (void)
   metaEnum = QSerialPort::staticMetaObject.enumerator(offset);
   count = metaEnum.keyCount();
   for (i = 0; i < count; ++i)
-    this->ui->comboBox_BaudRate->addItem( metaEnum.key(i));
+    this->ui->comboBox_BaudRate->addItem( metaEnum.key(i), metaEnum.value(i));
 
   // DataBits
   this->ui->comboBox_DataBits->clear();
@@ -97,7 +97,7 @@ void UiAddPort::setComboBoxes (void)
   metaEnum = QSerialPort::staticMetaObject.enumerator(offset);
   count = metaEnum.keyCount();
   for (i = 0; i < count; ++i)
-    this->ui->comboBox_DataBits->addItem( metaEnum.key(i));
+      this->ui->comboBox_DataBits->addItem( metaEnum.key(i), metaEnum.value(i));
 
   // Parity
   this->ui->comboBox_Parity->clear();
@@ -108,7 +108,7 @@ void UiAddPort::setComboBoxes (void)
   metaEnum = QSerialPort::staticMetaObject.enumerator(offset);
   count = metaEnum.keyCount();
   for (i = 0; i < count; ++i)
-    this->ui->comboBox_Parity->addItem( metaEnum.key(i));
+    this->ui->comboBox_Parity->addItem( metaEnum.key(i), metaEnum.value(i));
 
   // StopBits
   this->ui->comboBox_StopBits->clear();
@@ -119,7 +119,7 @@ void UiAddPort::setComboBoxes (void)
   metaEnum = QSerialPort::staticMetaObject.enumerator(offset);
   count = metaEnum.keyCount();
   for (i = 0; i < count; ++i)
-    this->ui->comboBox_StopBits->addItem( metaEnum.key(i));
+      this->ui->comboBox_StopBits->addItem( metaEnum.key(i), metaEnum.value(i));
 
   // FlowControl
   this->ui->comboBox_FlowControl->clear();
@@ -130,16 +130,8 @@ void UiAddPort::setComboBoxes (void)
   metaEnum = QSerialPort::staticMetaObject.enumerator(offset);
   count = metaEnum.keyCount();
   for (i = 0; i < count; ++i)
-    this->ui->comboBox_FlowControl->addItem( metaEnum.key(i));
+      this->ui->comboBox_FlowControl->addItem( metaEnum.key(i), metaEnum.value(i));
 
-  // Role
-  // offset = ModBusDevice::staticMetaObject.indexOfEnumerator("DeviceRole");
-  // assert (-1 != offset);
-
-  // metaEnum = ModBusDevice::staticMetaObject.enumerator(offset);
-  // count = metaEnum.keyCount();
-  // for (i = 0; i < count; ++i)
-  //   this->ui->comboBox_Role->addItem( metaEnum.key(i));
 }
 
 /**
@@ -170,11 +162,11 @@ void UiAddPort::buttonAddPortClicked (void)
 
 
   emit this->addPort(this->ui->comboBox_Port->currentText(),
-      *(QSerialPort::BaudRate *)(this->ui->comboBox_BaudRate->currentData().data()),
-      *(QSerialPort::DataBits *)(this->ui->comboBox_DataBits->currentData().data()),
-      *(QSerialPort::Parity *)(this->ui->comboBox_Parity->currentData().data()),
-      *(QSerialPort::StopBits *)(this->ui->comboBox_StopBits->currentData().data()),
-      *(QSerialPort::FlowControl *)(this->ui->comboBox_FlowControl->currentData().data())
+      static_cast<QSerialPort::BaudRate   >(this->ui->comboBox_BaudRate->currentData().toInt()),
+      static_cast<QSerialPort::DataBits   >(this->ui->comboBox_DataBits->currentData().toInt()),
+      static_cast<QSerialPort::Parity     >(this->ui->comboBox_Parity->currentData().toInt()),
+      static_cast<QSerialPort::StopBits   >(this->ui->comboBox_StopBits->currentData().toInt()),
+      static_cast<QSerialPort::FlowControl>(this->ui->comboBox_FlowControl->currentData().toInt())
       );
 
 }

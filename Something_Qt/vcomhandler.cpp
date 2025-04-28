@@ -16,7 +16,7 @@
 #include "vcomhandler.h"
 
 /* Defines */
-#define _qDebugHex(__X) QString("%1").arg(__X,0,16)
+#define _//qDebugHex(__X) QString("%1").arg(__X,0,16)
 
 /* Class Method implemnentations */
 
@@ -28,7 +28,7 @@
  */
 VComHandler::VComHandler(QObject * parent): QSerialPort(parent)
 {
-  qDebug () << "[I] VComHanlde: Initialized at: " << this;
+  //qDebug () << "[I] VComHanlde: Initialized at: " << this;
 }
 
 /**
@@ -51,7 +51,7 @@ VComHandler::VComHandler(QByteArray & BufferRx, QByteArray & BufferTx,
   this->m_pBufferMutexRx = & MutexRx;
   this->m_pBufferMutexTx = & MutexTx;
 
-  qDebug () << "[I] VComHanlde: Initialized at: " << this;
+  //qDebug () << "[I] VComHanlde: Initialized at: " << this;
 }
 
 /**
@@ -65,7 +65,7 @@ VComHandler::~VComHandler(void)
   if (this->isOpen())
     this->releasePort();
 
-  qDebug () << "[I] VcomHandle: Vanished at: " << this;
+  //qDebug () << "[I] VcomHandle: Vanished at: " << this;
 }
 
 /**
@@ -96,7 +96,7 @@ void VComHandler::setPort (QString const & PortName, quint32 const & BaudRate,
   this->setStopBits ( static_cast<QSerialPort::StopBits>(StopBits) );
   this->setFlowControl ( static_cast<QSerialPort::FlowControl>(FlowControl) );
 
-  qDebug () << "[I] VComHanlde: setPort at: " << this;
+  //qDebug () << "[I] VComHanlde: setPort at: " << this;
 }
 
 /**
@@ -127,7 +127,7 @@ void VComHandler::setPort (QString const & PortName, QSerialPort::BaudRate const
   this->setStopBits (StopBits);
   this->setFlowControl (FlowControl);
 
-  qDebug () << "[I] VComHanlde: setPort at: " << this;
+  //qDebug () << "[I] VComHanlde: setPort at: " << this;
 }
 
 /**
@@ -142,16 +142,16 @@ void VComHandler::openPort (quint32 const & Mode)
   if (this->isOpen ()) // if already open
   {
     this->setErrorString ("[!] VComHandler: Port Already Open\r\n");
-    qDebug () << "[!] VComHandler: Port Already Open\r\n";
+    //qDebug () << "[!] VComHandler: Port Already Open\r\n";
   }
   else if (! this->open (static_cast<QIODeviceBase::OpenMode>(Mode))) // if failed to open
   {
     this->setErrorString ("[!] VComHandler: Port Could not Opened\r\n");
-    qDebug () << "[!] VComHandler: Port Could not Opened\r\n";
+    //qDebug () << "[!] VComHandler: Port Could not Opened\r\n";
   }
   else // Successful to open the port
   {
-    qDebug () << "[I] VComHanlde: openPort: " << this->portName() << " At "<< this;
+    //qDebug () << "[I] VComHanlde: openPort: " << this->portName() << " At "<< this;
   }
 }
 
@@ -167,16 +167,16 @@ void VComHandler::openPort (QIODeviceBase::OpenMode const & Mode)
   if (this->isOpen ()) // if already open
   {
     this->setErrorString ("[!] VComHandler: Port Already Open\r\n");
-    qDebug () << "[!] VComHandler: Port Already Open\r\n";
+    //qDebug () << "[!] VComHandler: Port Already Open\r\n";
   }
   else if (! this->open (Mode)) // if failed to open
   {
     this->setErrorString ("[!] VComHandler: Port Could not Opened\r\n");
-    qDebug () << "[!] VComHandler: Port Could not Opened\r\n";
+    //qDebug () << "[!] VComHandler: Port Could not Opened\r\n";
   }
   else // Successful to open the port
   {
-    qDebug () << "[I] VComHanlde: openPort: " << this->portName() << " At "<< this;
+    //qDebug () << "[I] VComHanlde: openPort: " << this->portName() << " At "<< this;
   }
 }
 
@@ -193,7 +193,7 @@ void VComHandler::releasePort (void)
   /* If set, Lock mutexes and release port */
   // This May cause long pooling !!
   // Wait for mutex
-  qDebug () << "[I] VComHanlder: releasePort, TryLock Mutex: " << this;
+  //qDebug () << "[I] VComHanlder: releasePort, TryLock Mutex: " << this;
 
   // Locking mutexes
   // even when Mutexes are not set, releasing buffer should be available
@@ -203,7 +203,7 @@ void VComHandler::releasePort (void)
   if (nullptr != this->m_pBufferTx)
     this->m_pBufferMutexTx->lock();
 
-  qDebug () << "[I] VComHanlder: releasePort, Locked Mutex: " << this;
+  //qDebug () << "[I] VComHanlder: releasePort, Locked Mutex: " << this;
 
   // Close Port
   this->close();
@@ -214,7 +214,7 @@ void VComHandler::releasePort (void)
   if (nullptr != this->m_pBufferTx)
     this->m_pBufferMutexRx->unlock();
 
-  qDebug () << "[I] VComHanlder: releasePort, UNLocked Mutex: " << this;
+  //qDebug () << "[I] VComHanlder: releasePort, UNLocked Mutex: " << this;
 }
 
 /**
@@ -234,12 +234,12 @@ void VComHandler::setMutex(QMutex & Src, VComHandler::Direction const & Directio
   if (Direction == VComHandler::Direction::Rx)
   {
     this->m_pBufferMutexRx = &Src;
-    qDebug () << "[I] VComHanlder: setMutex: NewMutexRx " << this->m_pBufferMutexRx<< " " << this;
+    //qDebug () << "[I] VComHanlder: setMutex: NewMutexRx " << this->m_pBufferMutexRx<< " " << this;
   }
   else
   {
     this->m_pBufferMutexTx = &Src;
-    qDebug () << "[I] VComHanlder: setMutex: NewMutexTx " << this->m_pBufferMutexTx<< " " << this;
+    //qDebug () << "[I] VComHanlder: setMutex: NewMutexTx " << this->m_pBufferMutexTx<< " " << this;
   }
 }
 
@@ -505,8 +505,8 @@ void VComHandler::readSystemBuffer (void)
   if (nullptr != this->m_pBufferMutexRx)
     this->m_pBufferMutexRx->unlock();
 
-  qDebug () << "System Buffer Read: " << dataRead;
-  qDebug () << "User Buffer Rx is now " << this->m_pBufferRx->toHex();
+  //qDebug () << "System Buffer Read: " << dataRead;
+  //qDebug () << "User Buffer Rx is now " << this->m_pBufferRx->toHex();
 
   // Emit Signal
   emit this->systemBufferRead();
@@ -539,9 +539,9 @@ void VComHandler::writeSystemBuffer (void)
   if (this->m_pBufferMutexTx)
     this->m_pBufferMutexTx->unlock();
 
-  qDebug () << "System Buffer Write Tx: " << * (this->m_pBufferTx);
-  qDebug () << "User Buffer is now Tx: " << this->m_pBufferTx->toHex();
-  qDebug () << "Write Err " << err;
+  //qDebug () << "System Buffer Write Tx: " << * (this->m_pBufferTx);
+  //qDebug () << "User Buffer is now Tx: " << this->m_pBufferTx->toHex();
+  //qDebug () << "Write Err " << err;
 
   // clear tx buffer so that bytes sent wont be sended again
   this->m_pBufferTx->clear();

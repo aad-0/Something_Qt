@@ -64,9 +64,12 @@ signals:
      * @param pStopBits StopBits
      * @param pFlowControl FlowControl
      */
-    void addPort (QString const PortName, QSerialPort::BaudRate const BaudRate,
-        QSerialPort::DataBits const DataBits, QSerialPort::Parity const Parity,
-        QSerialPort::StopBits const StopBits, QSerialPort::FlowControl const FlowControl);
+    void addPort (QString const PortName,
+                  QSerialPort::BaudRate const BaudRate,
+                  QSerialPort::DataBits const DataBits,
+                  QSerialPort::Parity const Parity,
+                  QSerialPort::StopBits const StopBits,
+                 QSerialPort::FlowControl const FlowControl);
 
     /**
      * @brief releaseRequest This is emited when close button is clicked
