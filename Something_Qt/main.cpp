@@ -5,7 +5,7 @@
 
 #include "comm.h"
 
-//#define TEST_COM
+// #define TEST_COM
 
 int test_com (int argc, char * argv [])
 {

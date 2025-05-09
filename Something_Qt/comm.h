@@ -15,6 +15,9 @@ extern "C"
 #define DONTUSE
 #define USERSTRUCT
 #define USERENUM
+#define PAYLOAD
+#define COMMAND
+#define COMMAND_MASK
 
 /**
  * @brief ComDef_TypeDef
@@ -35,11 +38,11 @@ DONTUSE typedef struct __attribute__((__packed__)) com_def_s
 /**
  * @brief ComDefImu_TypeDef
  */
-USERSTRUCT typedef struct __attribute__ ((__packed__ )) com_def_imu_s
+USERSTRUCT PAYLOAD typedef struct __attribute__ ((__packed__ )) com_def_imu_s
 {
-    float fX;
-    float fY;
-    float fZ;
+    uint32_t fX;
+    uint32_t fY;
+    uint32_t fZ;
 } ComDefImu_TypeDef;
 
 
@@ -47,7 +50,7 @@ USERSTRUCT typedef struct __attribute__ ((__packed__ )) com_def_imu_s
 /**
  * @brief ComDefMode_TypeDef
  */
-USERSTRUCT typedef struct __attribute__((__packed__)) com_def_mode_s
+USERSTRUCT PAYLOAD typedef struct __attribute__((__packed__)) com_def_mode_s
 {
     uint8_t u8Mode;
 } ComDefMode_TypeDef;
@@ -55,54 +58,60 @@ USERSTRUCT typedef struct __attribute__((__packed__)) com_def_mode_s
 /**
  * @brief ComDefAngle_TypeDef
  */
-USERSTRUCT typedef struct __attribute__((__packed__)) com_def_angle_s
+USERSTRUCT PAYLOAD typedef struct __attribute__((__packed__)) com_def_angle_s
 {
     uint16_t u16Angle;
 } ComDefAngle_TypeDef;
 
+
+USERSTRUCT PAYLOAD typedef struct __attribute__((__packed__)) com_def_sampling_rate_s
+{
+    uint16_t u16SamplingRate;
+} ComDefSamplingRate_TypeDef;
+
 /**
  * @brief ComDefCommandMask_TypeDef
  */
-USERENUM typedef enum com_def_command_mask_e
+USERENUM COMMAND typedef enum com_def_command_mask_e
 {
-    ComDefCommandMaskXet  = 0x0F,
+    ComDefCommandMask  = 0x0F,
     ComDefCommandMaskGet  = 0x01,
     ComDefCommandMaskSet  = 0x02,
-    ComDefCommandMaskRet  = 0x04,
+    ComDefCommandMaskRet  = 0x04, ///< this is what slave or master returns.
 } ComDefCommandMask_TypeDef;
 
 
 /**
  * @brief ComDefCommands_TypeDef
  */
-USERENUM typedef enum com_def_commands_e
+USERENUM COMMAND typedef enum com_def_commands_e
 {
     ComDefCommandModeMask     = 0xF0,
     ComDefCommandMode         = 0x10,
     ComDefCommandAngle        = 0x20,
     ComDefCommandSamplingRate = 0x40,
+    ComDefCommandStatus       = 0x80,
 } ComDefCommands_TypeDef;
+
+USERENUM PAYLOAD typedef enum com_def_command_status_e
+{
+  //< @todo imp
+
+} ComDefCommandStatus_TypeDef;
 
 
 /**
  * @brief ComDef_Modes_TypeDef
+ * @note This is Fucking for ComdefCommandMode
  */
-USERENUM typedef enum com_def_modes_e
+USERENUM PAYLOAD typedef enum com_def_modes_e
 {
     ComDefModeStream    = 0x01,
     ComDefModeOnRequest = 0x02,
+    ComDefModeStop      = 0x04,
 } ComDef_Modes_TypeDef;
 
 
-
-// #define ComDef_xu8CommandGet(__COMMAND)  \
-//   ( (__COMMAND) | CommandMaskGet )
-//
-// #define ComDef_xu8CommandSet(__COMMAND)  \
-//   ( (__COMMAND) | CommandMaskGet )
-//
-// #define ComDef_xu8CommandRet(__COMMAND)  \
-//   ( (__COMMAND) | CommandMaskRet )
 
 
 #define ComDef_xu8CommandMask(__COMMAND, __MASK)  \
@@ -119,19 +128,19 @@ USERENUM typedef enum com_def_modes_e
 ( ( (ComDef_TypeDef*) ((__MSG__)) )->u16PayloadLength )
 
 #define ComDef_xu8GetCrc(__MSG__)  \
-( * (  ( (uint8_t*)((__MSG__)) ) + ComDef_xu16GetPayloadLength(__MSG__) +3 ) )
+( * (  ( (uint8_t*)((__MSG__)) ) + ComDef_xu16GetPayloadLength(__MSG__) +4 ) )
 
 #define ComDef_xu8GetEnd(__MSG__)  \
-( * ( ( (uint8_t*)((__MSG__)) ) + ComDef_xu16GetPayloadLength(__MSG__) +4 ) )
+( * ( ( (uint8_t*)((__MSG__)) ) + ComDef_xu16GetPayloadLength(__MSG__) +5 ) )
 
 #define ComDef_xpu8DeclareBuffer(__BUFFERNAME, __PAYLOADTYPE) \
-uint8_t __BUFFERNAME [sizeof( __PAYLOADTYPE) + 5] = {0}
+uint8_t __BUFFERNAME [sizeof( __PAYLOADTYPE) + 6] = {0}
 
 #define ComDef_xpu8GetPayload(__MSG__)  \
-( * ( ( (uint8_t *)&( ComDef_xu16GetPayloadLength(__MSG__)) ) +1) )
+( * ( ( (uint8_t *)&( ComDef_xu16GetPayloadLength(__MSG__)) ) +2) )
 
 #define ComDef_xpu32CalculateLength(__MSG__) \
-( ComDef_xu16GetPayloadLength(__MSG__) +5 )
+( ComDef_xu16GetPayloadLength(__MSG__) +6 )
 
 
 

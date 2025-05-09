@@ -107,7 +107,7 @@ int32_t AccelDevice::stateMachine ()
     switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
     {
     case (ComDefCommandMode):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMaskXet)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -119,8 +119,8 @@ int32_t AccelDevice::stateMachine ()
 
         break;
 
-    case (ComDefCommandAngle):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMaskXet)
+    case (ComDefCommandImu):
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -138,7 +138,7 @@ int32_t AccelDevice::stateMachine ()
         break;
 
     case (ComDefCommandSamplingRate):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMaskXet)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -148,6 +148,20 @@ int32_t AccelDevice::stateMachine ()
             break;
         }
         break;
+
+    case (ComDefCommandAngle):
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
+        {
+        case (ComDefCommandMaskGet):
+            break;
+        case (ComDefCommandMaskSet):
+            break;
+        case (ComDefCommandMaskRet):
+            qDebug () << " Angle Set ";
+            break;
+        }
+        break;
+
 
     }
 

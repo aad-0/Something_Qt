@@ -6,7 +6,6 @@
 
 #include "acceldevice.h"
 #include "uiaddport.h"
-#include "roadvisualizer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,7 +22,6 @@ private:
     QThread * _mpAccelDeviceThread;
     UiAddPort * _mpUiAddPort; // render all the time for now
 
-    RoadVisualizer * _mpAccelView;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -37,6 +35,17 @@ private slots:
     void portChange (QString const PortName, QSerialPort::BaudRate const BaudRate,
         QSerialPort::DataBits const DataBits, QSerialPort::Parity const Parity,
         QSerialPort::StopBits const StopBits,QSerialPort::FlowControl const FlowControl);
+
+    /// Port
+    void openPortOnClick (void);
+    void closePortOnClick (void);
+
+    /// Controls
+    void setModeOnClick (void);
+    void setAngleOnClick (void);
+    void setSamplingRateOnClick (void);
+
+    void updateUiElements (void);
 
 protected slots:
 public slots:

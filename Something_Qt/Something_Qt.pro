@@ -14,7 +14,6 @@ CONFIG += c++17
 
 
 SOURCES += \
-	roadvisualizer.cpp \
 		uiaddport.cpp \
 	acceldevice.cpp \
 	comm.c \
@@ -23,7 +22,6 @@ SOURCES += \
 	mainwindow.cpp
 
 HEADERS += \
-	roadvisualizer.h \
 		uiaddport.h \
 	acceldevice.h \
 	comm.h \
