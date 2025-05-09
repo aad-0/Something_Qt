@@ -88,14 +88,14 @@ USERENUM COMMAND typedef enum com_def_commands_e
 {
     ComDefCommandModeMask     = 0xF0,
     ComDefCommandMode         = 0x10,
-    ComDefCommandAngle        = 0x20,
+    ComDefCommandImu          = 0x20,
     ComDefCommandSamplingRate = 0x40,
-    ComDefCommandStatus       = 0x80,
+    ComDefCommandAngle        = 0x80,
 } ComDefCommands_TypeDef;
 
 USERENUM PAYLOAD typedef enum com_def_command_status_e
 {
-  //< @todo imp
+
 
 } ComDefCommandStatus_TypeDef;
 
