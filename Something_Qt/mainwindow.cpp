@@ -96,7 +96,7 @@ void MainWindow::portChange (QString const PortName, QSerialPort::BaudRate const
 
     QMetaObject::invokeMethod(
         this->_mpAccelDevice,
-        [this]() { this->_mpAccelDevice->startTimer(0); },
+        [this]() { this->_mpAccelDevice->startTimer(10); },
         Qt::QueuedConnection
         );
 

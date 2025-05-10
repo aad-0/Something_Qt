@@ -60,7 +60,7 @@ int32_t AccelDevice::stateMachine ()
 
 
     qDebug () << "############ HED RECEIVE BUFFER ###################";
-    qDebug () << this->_mBufferRx.size();
+    qDebug () << this->_mBufferRx;
     qDebug () << "############ END RECEIVE BUFFER ###################";
 
     // check buffer size
