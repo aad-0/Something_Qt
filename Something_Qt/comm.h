@@ -40,9 +40,11 @@ DONTUSE typedef struct __attribute__((__packed__)) com_def_s
  */
 USERSTRUCT PAYLOAD typedef struct __attribute__ ((__packed__ )) com_def_imu_s
 {
-    uint32_t fX;
-    uint32_t fY;
-    uint32_t fZ;
+    uint32_t Tick;
+    uint32_t Encoder;
+    float fX;
+    float fY;
+    float fZ;
 } ComDefImu_TypeDef;
 
 

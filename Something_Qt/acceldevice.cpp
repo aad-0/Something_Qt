@@ -107,7 +107,7 @@ int32_t AccelDevice::stateMachine ()
     switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
     {
     case (ComDefCommandMode):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -120,7 +120,7 @@ int32_t AccelDevice::stateMachine ()
         break;
 
     case (ComDefCommandImu):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -138,7 +138,7 @@ int32_t AccelDevice::stateMachine ()
         break;
 
     case (ComDefCommandSamplingRate):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMask)
         {
         case (ComDefCommandMaskGet):
             break;
@@ -150,7 +150,7 @@ int32_t AccelDevice::stateMachine ()
         break;
 
     case (ComDefCommandAngle):
-        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandModeMask)
+        switch (ComDef_xu8GetCommand(pRxHead) & ComDefCommandMask)
         {
         case (ComDefCommandMaskGet):
             break;
