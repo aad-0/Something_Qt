@@ -19,14 +19,16 @@ SOURCES += \
 	comm.c \
 	vcomhandler.cpp \
 	main.cpp \
-	mainwindow.cpp
+	mainwindow.cpp \
+    threadmanager.cpp
 
 HEADERS += \
 		uiaddport.h \
 	acceldevice.h \
 	comm.h \
 	vcomhandler.h \
-	mainwindow.h
+	mainwindow.h \
+    threadmanager.h
 
 FORMS += \
 		uiaddport.ui \
