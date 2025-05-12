@@ -6,9 +6,11 @@
 #include <QSerialPort> // For QSerialPort enums
 #include <QString>
 #include <QByteArray> // Include QByteArray
+#include "comm.h" // For ComDefImu_TypeDef
 
 // Forward declarations
 class AccelDevice;
+class CsvWriter; // Forward declare CsvWriter
 
 class ThreadManager : public QObject
 {
@@ -17,6 +19,9 @@ class ThreadManager : public QObject
 private:
     AccelDevice* _mpAccelDevice;
     QThread* _mpAccelDeviceThread;
+    
+    CsvWriter* _mCsvWriter;         // Pointer to the CsvWriter instance
+    QThread* _mCsvWriterThread;   // Pointer to the thread for CsvWriter
 
 public:
     explicit ThreadManager(QObject *parent = nullptr);
@@ -39,7 +44,7 @@ public slots:
 private slots:
     void onAccelDeviceDestroyed(); // Slot to handle cleanup when device is destroyed
     // void onAccelDataReceived(float x, float y, float z); // Example if data needs relaying
-
+    void onCsvWriterThreadFinished(); // Slot to manage CsvWriter thread cleanup
 
 };
 

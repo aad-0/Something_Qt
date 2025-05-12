@@ -3,6 +3,8 @@
 #include "comm.h"
 #include <QMutexLocker>
 #include <cassert>
+#include <QMetaType>
+#include <QDebug>
 
 /**
  * @brief AccelDevice::AccelDevice
@@ -17,6 +19,8 @@ AccelDevice::AccelDevice(QObject *parent)
     QObject::connect(this->_mTimerReadOs, SIGNAL( timeout() ), this, SLOT( readSystemBuffer() ));
     QObject::connect(this, SIGNAL( systemBufferRead() ), this, SLOT( stateMachine() ));
 
+    // Register the custom struct for signal/slot communication across threads
+    qRegisterMetaType<ComDefImu_TypeDef>("ComDefImu_TypeDef");
 
     // starts threads and timers
     // this->_mTimerReadOs.start();
@@ -133,6 +137,8 @@ int32_t AccelDevice::stateMachine ()
                      << " \r\n PAYLOAD FZ " << pPayload->fZ;
 
             emit this->AccelUpdated (pPayload->fX, pPayload->fY, pPayload->fZ);
+            // Emit the raw IMU data structure
+            emit this->ImuData(*pPayload); 
             break;
         }
         break;

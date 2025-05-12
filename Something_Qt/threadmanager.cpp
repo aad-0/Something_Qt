@@ -1,19 +1,59 @@
 #include "threadmanager.h"
 #include "acceldevice.h" // For AccelDevice class
+#include "csvwriter.h"    // Include CsvWriter header
 #include "comm.h"        // For communication definitions
 #include <QDebug>
 
 ThreadManager::ThreadManager(QObject *parent)
     : QObject(parent),
       _mpAccelDevice(nullptr),
-      _mpAccelDeviceThread(nullptr)
+      _mpAccelDeviceThread(nullptr),
+      _mCsvWriter(nullptr),        // Initialize CsvWriter pointer
+      _mCsvWriterThread(nullptr)  // Initialize CsvWriter thread pointer
 {
-    qDebug() << "ThreadManager created";
+    qDebug() << "ThreadManager created in thread:" << QThread::currentThreadId();
+
+    // --- CsvWriter Setup ---
+    _mCsvWriter = new CsvWriter(); // Create CsvWriter instance (uses default filename)
+    _mCsvWriterThread = new QThread(this); // Create thread, parented to manager
+    _mCsvWriter->moveToThread(_mCsvWriterThread);
+
+    // Connect thread finished signal to trigger deletion of writer and thread
+    connect(_mCsvWriterThread, &QThread::finished, _mCsvWriter, &QObject::deleteLater);
+    connect(_mCsvWriterThread, &QThread::finished, _mCsvWriterThread, &QObject::deleteLater);
+    // Connect finished signal to manager's cleanup slot (optional)
+    connect(_mCsvWriterThread, &QThread::finished, this, &ThreadManager::onCsvWriterThreadFinished);
+
+    _mCsvWriterThread->start();
+    qDebug() << "CsvWriter thread started.";
+    // --- End CsvWriter Setup ---
 }
 
 ThreadManager::~ThreadManager()
 {
-    handleClosePort(); // Ensure cleanup on destruction
+    qDebug() << "ThreadManager destructor started.";
+    // Clean up AccelDevice thread first
+    handleClosePort(); 
+
+    // --- CsvWriter Cleanup ---
+    if (_mCsvWriterThread) {
+        qDebug() << "Requesting CsvWriter thread quit.";
+        _mCsvWriterThread->quit();
+        if (!_mCsvWriterThread->wait(3000)) { // Wait up to 3 seconds
+            qWarning() << "CsvWriter thread did not finish gracefully, terminating.";
+            _mCsvWriterThread->terminate();
+            _mCsvWriterThread->wait(); // Wait after termination
+        }
+        // Deletion is handled by deleteLater connections
+        qDebug() << "CsvWriter thread cleanup process initiated."; 
+    }
+     else if (_mCsvWriter) {
+         // If thread wasn't created but writer was (should not happen here), delete writer directly
+         delete _mCsvWriter;
+         _mCsvWriter = nullptr;
+    }
+    // --- End CsvWriter Cleanup ---
+
     qDebug() << "ThreadManager destroyed";
 }
 
@@ -23,26 +63,32 @@ void ThreadManager::handlePortChange(const QString& portName, QSerialPort::BaudR
 {
     if (_mpAccelDevice) {
         qDebug() << "Closing existing AccelDevice before opening new port";
+        // Disconnect existing signal connection before closing/deleting device
+        if (_mCsvWriter) { // Check if CsvWriter exists
+             disconnect(_mpAccelDevice, &AccelDevice::ImuData, _mCsvWriter, &CsvWriter::writeImuData);
+        }
         handleClosePort();
     }
 
-    _mpAccelDeviceThread = new QThread(this); // Parent to ThreadManager for auto-deletion if ThreadManager is deleted
-    _mpAccelDevice = new AccelDevice(nullptr); // No parent, will be moved to thread and deleted with thread
-
+    // --- AccelDevice Setup ---
+    _mpAccelDeviceThread = new QThread(this); 
+    _mpAccelDevice = new AccelDevice(nullptr); 
     _mpAccelDevice->setPort(portName, baudRate, dataBits, parity, stopBits, flowControl);
-    // Attempt to open port, check for success if AccelDevice::openPort provides feedback
     _mpAccelDevice->openPort(QIODeviceBase::ReadWrite);
-
     _mpAccelDevice->moveToThread(_mpAccelDeviceThread);
-
-    // Connect AccelDevice's destroyed signal to a slot for cleanup
     connect(_mpAccelDevice, &AccelDevice::destroyed, this, &ThreadManager::onAccelDeviceDestroyed);
-    // Ensure thread quits when AccelDevice is deleted (e.g., if deleted by itself or an error)
     connect(_mpAccelDevice, &AccelDevice::destroyed, _mpAccelDeviceThread, &QThread::quit);
-
-    // When thread finishes, delete AccelDevice and the thread itself
     connect(_mpAccelDeviceThread, &QThread::finished, _mpAccelDevice, &QObject::deleteLater);
     connect(_mpAccelDeviceThread, &QThread::finished, _mpAccelDeviceThread, &QObject::deleteLater);
+    // --- End AccelDevice Setup ---
+
+    // *** Connect AccelDevice's ImuData signal to CsvWriter's slot ***
+    if (_mCsvWriter) { // Ensure CsvWriter instance exists before connecting
+        connect(_mpAccelDevice, &AccelDevice::ImuData, _mCsvWriter, &CsvWriter::writeImuData, Qt::QueuedConnection);
+        qDebug() << "Connected AccelDevice::ImuData to CsvWriter::writeImuData";
+    } else {
+        qWarning() << "CsvWriter instance is null, cannot connect ImuData signal.";
+    }
 
     _mpAccelDeviceThread->start();
 
@@ -50,7 +96,7 @@ void ThreadManager::handlePortChange(const QString& portName, QSerialPort::BaudR
     QMetaObject::invokeMethod(
         _mpAccelDevice,
         [this]() { 
-            if (_mpAccelDevice) { // Check if _mpAccelDevice is still valid
+            if (_mpAccelDevice) { 
                 _mpAccelDevice->startTimer(0); 
             }
         },
@@ -58,56 +104,65 @@ void ThreadManager::handlePortChange(const QString& portName, QSerialPort::BaudR
     );
 
     qDebug() << "AccelDevice created and moved to thread:" << _mpAccelDeviceThread;
-    // If AccelDevice has signals for data (e.g., AccelUpdated), connect them here if ThreadManager needs to act on them
-    // connect(_mpAccelDevice, &AccelDevice::AccelUpdated, this, &ThreadManager::onAccelDataReceived);
 }
 
 void ThreadManager::onAccelDeviceDestroyed()
 {
     qDebug() << "AccelDevice was destroyed, cleaning up pointers in ThreadManager";
-    _mpAccelDevice = nullptr;       // Nullify pointer as the object is gone
-    // _mpAccelDeviceThread will be deleted by its finished signal connection
-    // or if ThreadManager is destroyed and _mpAccelDeviceThread is its child.
-    // If thread is still running, it should be quit by other means (e.g. AccelDevice::destroyed connection)
+    // Disconnect signal if necessary (though AccelDevice is already destroyed)
+     if (_mpAccelDevice && _mCsvWriter) {
+        disconnect(_mpAccelDevice, &AccelDevice::ImuData, _mCsvWriter, &CsvWriter::writeImuData);
+     }
+    _mpAccelDevice = nullptr; 
 }
 
 void ThreadManager::handleClosePort()
 {
     if (_mpAccelDeviceThread && _mpAccelDeviceThread->isRunning()) {
         qDebug() << "Stopping AccelDevice thread";
-        // Stop the timer in AccelDevice first, if possible, via queued connection
+         // Disconnect signal before stopping thread and deleting device
+         if (_mpAccelDevice && _mCsvWriter) {
+             disconnect(_mpAccelDevice, &AccelDevice::ImuData, _mCsvWriter, &CsvWriter::writeImuData);
+             qDebug() << "Disconnected AccelDevice::ImuData signal.";
+         }
         if (_mpAccelDevice) {
              QMetaObject::invokeMethod(_mpAccelDevice, "stopTimer", Qt::QueuedConnection);
         }
         _mpAccelDeviceThread->quit();
-        if (!_mpAccelDeviceThread->wait(3000)) { // Wait for max 3 seconds
+        if (!_mpAccelDeviceThread->wait(3000)) { 
             qDebug() << "AccelDevice thread did not quit gracefully, terminating...";
             _mpAccelDeviceThread->terminate();
-            _mpAccelDeviceThread->wait(); // Wait for termination
+            _mpAccelDeviceThread->wait(); 
         }
     } else if (_mpAccelDeviceThread) {
-        // If thread is not running but exists, it might just need deletion
         _mpAccelDeviceThread->deleteLater();
     }
 
-    // _mpAccelDevice will be deleted when _mpAccelDeviceThread finishes due to connections.
-    // If _mpAccelDevice was not moved to thread or thread didn't start, delete manually.
-    if (_mpAccelDevice && !_mpAccelDeviceThread) { // Or if thread didn't own it
+    if (_mpAccelDevice && !_mpAccelDeviceThread) { 
         delete _mpAccelDevice;
     }
    
     _mpAccelDevice = nullptr;
-    _mpAccelDeviceThread = nullptr; // Pointer is now invalid
-    qDebug() << "Port closed and resources cleaned up.";
+    _mpAccelDeviceThread = nullptr; 
+    qDebug() << "Port closed and AccelDevice resources cleaned up.";
 }
 
+// Slot for CsvWriter thread finished signal
+void ThreadManager::onCsvWriterThreadFinished()
+{
+    qDebug() << "Received CsvWriter thread finished signal. Cleanup handled by deleteLater.";
+    // Pointers will be nullified after deleteLater executes
+    // _mCsvWriter = nullptr; // Not needed immediately, handled by deleteLater's event loop processing
+    // _mCsvWriterThread = nullptr;
+}
+
+// Implement handlers for other actions (SetMode, SetAngle, SetSamplingRate) - Keep existing implementations
 void ThreadManager::handleSetMode(uint8_t mode)
 {
     if (!_mpAccelDevice) {
         qDebug() << "SetMode: AccelDevice not available";
         return;
     }
-
     ComDef_xpu8DeclareBuffer(toAccelDeviceRaw, ComDefMode_TypeDef);
     ComDef_xu8GetHeading(&toAccelDeviceRaw) = 0xAA;
     ComDef_xu8GetCommand(&toAccelDeviceRaw) = ComDef_xu8CommandMask(ComDefCommandMode, ComDefCommandMaskSet);
@@ -116,11 +171,8 @@ void ThreadManager::handleSetMode(uint8_t mode)
     payload->u8Mode = mode;
     ComDef_xu8GetCrc(&toAccelDeviceRaw) = 0xFA; // Placeholder CRC
     ComDef_xu8GetEnd(&toAccelDeviceRaw) = 0xBB;
-
     uint32_t length = ComDef_xpu32CalculateLength(&toAccelDeviceRaw);
     QByteArray commandData(reinterpret_cast<const char*>(toAccelDeviceRaw), length);
-
-    // Invoke writeBuffer on AccelDevice's thread
     QMetaObject::invokeMethod(
         _mpAccelDevice,
         "writeBuffer",
@@ -137,7 +189,6 @@ void ThreadManager::handleSetAngle(uint16_t angle)
         qDebug() << "SetAngle: AccelDevice not available";
         return;
     }
-
     ComDef_xpu8DeclareBuffer(toAccelDeviceRaw, ComDefAngle_TypeDef);
     ComDef_xu8GetHeading(&toAccelDeviceRaw) = 0xAA;
     ComDef_xu8GetCommand(&toAccelDeviceRaw) = ComDef_xu8CommandMask(ComDefCommandAngle, ComDefCommandMaskSet);
@@ -146,10 +197,8 @@ void ThreadManager::handleSetAngle(uint16_t angle)
     payload->u16Angle = angle;
     ComDef_xu8GetCrc(&toAccelDeviceRaw) = 0xFA; // Placeholder CRC
     ComDef_xu8GetEnd(&toAccelDeviceRaw) = 0xBB;
-
     uint32_t length = ComDef_xpu32CalculateLength(&toAccelDeviceRaw);
     QByteArray commandData(reinterpret_cast<const char*>(toAccelDeviceRaw), length);
-
     QMetaObject::invokeMethod(
         _mpAccelDevice,
         "writeBuffer",
@@ -166,7 +215,6 @@ void ThreadManager::handleSetSamplingRate(uint16_t rate)
         qDebug() << "SetSamplingRate: AccelDevice not available";
         return;
     }
-
     ComDef_xpu8DeclareBuffer(toAccelDeviceRaw, ComDefSamplingRate_TypeDef);
     ComDef_xu8GetHeading(&toAccelDeviceRaw) = 0xAA;
     ComDef_xu8GetCommand(&toAccelDeviceRaw) = ComDef_xu8CommandMask(ComDefCommandSamplingRate, ComDefCommandMaskSet);
@@ -175,10 +223,8 @@ void ThreadManager::handleSetSamplingRate(uint16_t rate)
     payload->u16SamplingRate = rate;
     ComDef_xu8GetCrc(&toAccelDeviceRaw) = 0xFA; // Placeholder CRC
     ComDef_xu8GetEnd(&toAccelDeviceRaw) = 0xBB;
-
     uint32_t length = ComDef_xpu32CalculateLength(&toAccelDeviceRaw);
     QByteArray commandData(reinterpret_cast<const char*>(toAccelDeviceRaw), length);
-
     QMetaObject::invokeMethod(
         _mpAccelDevice,
         "writeBuffer",

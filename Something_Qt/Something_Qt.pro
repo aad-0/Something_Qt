@@ -20,7 +20,8 @@ SOURCES += \
 	vcomhandler.cpp \
 	main.cpp \
 	mainwindow.cpp \
-    threadmanager.cpp
+    threadmanager.cpp \
+    csvwriter.cpp
 
 HEADERS += \
 		uiaddport.h \
@@ -28,7 +29,8 @@ HEADERS += \
 	comm.h \
 	vcomhandler.h \
 	mainwindow.h \
-    threadmanager.h
+    threadmanager.h \
+    csvwriter.h
 
 FORMS += \
 		uiaddport.ui \

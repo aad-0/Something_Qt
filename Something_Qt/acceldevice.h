@@ -8,6 +8,7 @@
 #include <QMutex>
 #include "vcomhandler.h"
 #include <cstdint>
+#include "comm.h"
 
 class AccelDevice : public VComHandler
 {
@@ -31,6 +32,8 @@ private slots:
 
   signals:
       void AccelUpdated (float const & X, float const & Y, float const & Z);
+      void ImuData(ComDefImu_TypeDef data);
+
   public slots:
       int32_t startTimer (uint32_t MSec);
       int32_t stopTimer ();
