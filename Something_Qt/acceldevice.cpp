@@ -31,7 +31,7 @@ int32_t AccelDevice::startTimer (uint32_t MSec)
     QObject::connect(this->_mTimerReadOs, SIGNAL( timeout() ), this, SLOT( readSystemBuffer() ));
     this->_mTimerReadOs->start(MSec);
 
-    qDebug () << " Accel Device set Timer MSec " << MSec << " " << this;
+    // qDebug () << " Accel Device set Timer MSec " << MSec << " " << this;
 
     return 0;
 }
@@ -40,7 +40,7 @@ int32_t AccelDevice::stopTimer ()
     this->_mTimerReadOs->stop();
 
     QObject::disconnect(this->_mTimerReadOs, SIGNAL( timeout() ), this, SLOT( readSystemBuffer() ));
-    qDebug () << " Accel Device set Timer Stop " << this;
+    //qDebug () << " Accel Device set Timer Stop " << this;
 
     return 0;
 }
@@ -63,9 +63,9 @@ int32_t AccelDevice::stateMachine ()
     {
 
 
-    qDebug () << "############ HED RECEIVE BUFFER ###################";
-    qDebug () << this->_mBufferRx;
-    qDebug () << "############ END RECEIVE BUFFER ###################";
+    // qDebug () << "############ HED RECEIVE BUFFER ###################";
+    // qDebug () << this->_mBufferRx.size();
+    // qDebug () << "############ END RECEIVE BUFFER ###################";
 
     // check buffer size
     if ( 0 >= this->_mBufferRx.size() )
@@ -94,7 +94,7 @@ int32_t AccelDevice::stateMachine ()
     if (0xAA != ComDef_xu8GetHeading(pRxHead))
     {
         isSynced = false;
-        qDebug () << "This Should Not Have happened in this project, srrry\r\n";
+        // qDebug () << "This Should Not Have happened in this project, srrry\r\n";
         continue;
         assert (0);
     }
@@ -132,9 +132,9 @@ int32_t AccelDevice::stateMachine ()
             break;
         case (ComDefCommandMaskRet):
             ComDefImu_TypeDef * pPayload = (ComDefImu_TypeDef*) & ComDef_xpu8GetPayload(pRxHead);
-            qDebug () << "\r\n PAYLOAD FX " << pPayload->fX
-                     << " \r\n PAYLOAD FY " << pPayload->fY
-                     << " \r\n PAYLOAD FZ " << pPayload->fZ;
+            // qDebug () << "\r\n PAYLOAD FX " << pPayload->fX
+            //          << " \r\n PAYLOAD FY " << pPayload->fY
+            //          << " \r\n PAYLOAD FZ " << pPayload->fZ;
 
             emit this->AccelUpdated (pPayload->fX, pPayload->fY, pPayload->fZ);
             // Emit the raw IMU data structure
@@ -163,7 +163,7 @@ int32_t AccelDevice::stateMachine ()
         case (ComDefCommandMaskSet):
             break;
         case (ComDefCommandMaskRet):
-            qDebug () << " Angle Set ";
+            // qDebug () << " Angle Set ";
             break;
         }
         break;

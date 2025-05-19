@@ -96,8 +96,8 @@ void ThreadManager::handlePortChange(const QString& portName, QSerialPort::BaudR
     QMetaObject::invokeMethod(
         _mpAccelDevice,
         [this]() { 
-            if (_mpAccelDevice) { 
-                _mpAccelDevice->startTimer(0); 
+            if (_mpAccelDevice) {
+                _mpAccelDevice->startTimer(1);
             }
         },
         Qt::QueuedConnection
